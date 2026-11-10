@@ -2,18 +2,21 @@
   "name": "fortnite-chest-tracker",
   "version": "1.0.0",
   "description": "Gemeinsamer Fortnite-Kisten-Tracker",
-  "main": "desktop/main.js",
+  "main": "src-tauri/src/lib.rs",
   "scripts": {
-    "start": "electron .",
+    "start": "tauri dev",
     "server": "node server/index.js",
-    "dev": "concurrently \"npm run server\" \"npm run start\""
+    "dev": "tauri dev",
+    "build": "tauri build"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.12.4",
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
     "concurrently": "^9.1.2",
     "electron": "^45.2.3"
   }

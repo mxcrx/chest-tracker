@@ -1,5 +1,5 @@
-const { io } = require("socket.io-client");
-const { ipcRenderer } = require("electron");
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 
 const DROP_RATE = 137500;
 const DEADLINE = new Date(2026, 11, 5, 0, 0, 0);
@@ -177,12 +177,13 @@ $("hotkey-button").addEventListener("click", () => {
   $("hotkey-button").textContent = "Taste drücken …";
 });
 
-window.addEventListener("keydown", (event) => {
+window.addEventListener("keydown", async (event) => {
   if (recordingHotkey) {
     event.preventDefault();
     const value = prettifyKey(event);
     if (value && !["Ctrl", "Alt", "Shift", "Super"].includes(value)) {
-      ipcRenderer.invoke("hotkey:set", value).then((response) => {
+      try {
+        const response = await invoke("set_shortcut", { accelerator: value });
         if (!response.ok) {
           alert(response.error);
           $("hotkey-button").textContent = hotkey;
@@ -192,14 +193,23 @@ window.addEventListener("keydown", (event) => {
         localStorage.setItem("hotkey", hotkey);
         $("hotkey-button").textContent = hotkey;
         recordingHotkey = false;
-      });
+      } catch (err) {
+        console.error("Fehler beim Setzen des Shortcuts:", err);
+      }
     }
-    return;
   }
 });
 
-ipcRenderer.on("hotkey:pressed", () => addChest());
-ipcRenderer.invoke("hotkey:set", hotkey);
+async function initTauriListeners() {
+  try {
+    await listen("hotkey_pressed", () => addChest());
+    await invoke("set_shortcut", { accelerator: hotkey });
+  } catch (err) {
+    console.error("Fehler beim Initialisieren der Tauri-Listener:", err);
+  }
+}
+
+initTauriListeners();
 renderCountdown();
 renderLobbyStats();
 refreshLobbyStats();

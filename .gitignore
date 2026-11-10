@@ -3,3 +3,6 @@ dist/
 .env
 server/data.json
 server/data.json.tmp
+.idea/
+src-tauri/target/
+src-tauri/gen/schemas

@@ -5,34 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chest Hunt</title>
     <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@tauri-apps/api/core": "https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/core.js",
+          "@tauri-apps/api/event": "https://cdn.jsdelivr.net/npm/@tauri-apps/api@2/event.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script type="module" src="app.js"></script>
   </head>
   <body>
     <main>
       <section id="join-screen" class="card join-card">
         <p class="eyebrow">FORTNITE · SQUAD TRACKER</p>
         <h1>Chest Hunt</h1>
-        <p class="intro">Zählt gemeinsam jede geöffnete Kiste – live und über das Internet.</p>
+        <p class="intro">
+          Zählt gemeinsam jede geöffnete Kiste – live und über das Internet.
+        </p>
         <section class="lobby-stats">
           <p class="eyebrow">DEIN GESAMTPROFIL</p>
-          <div><strong id="lobby-count">0</strong><span>Kisten insgesamt</span></div>
-          <div class="lobby-details"><span>Deine Chance <b id="lobby-probability">0,0000 %</b></span><span>Bis 05.12. <b id="lobby-daily">— / Tag</b></span></div>
+          <div>
+            <strong id="lobby-count">0</strong><span>Kisten insgesamt</span>
+          </div>
+          <div class="lobby-details">
+            <span>Deine Chance <b id="lobby-probability">0,0000 %</b></span
+            ><span>Bis 05.12. <b id="lobby-daily">— / Tag</b></span>
+          </div>
         </section>
-        <label>Dein Name <input id="name" maxlength="32" placeholder="z. B. Marco" /></label>
-        <label>Server-Adresse <input id="server-url" placeholder="https://tracker.deinedomain.de" /></label>
-        <small>Ohne Server-Adresse wird für einen lokalen Test <code>http://localhost:3000</code> genutzt.</small>
-        <label>Raumcode <input id="room-code" maxlength="16" placeholder="z. B. SQUAD-2026" /></label>
+        <label
+          >Dein Name <input id="name" maxlength="32" placeholder="z. B. Marco"
+        /></label>
+        <label
+          >Server-Adresse
+          <input id="server-url" placeholder="https://tracker.deinedomain.de"
+        /></label>
+        <small
+          >Ohne Server-Adresse wird für einen lokalen Test
+          <code>http://localhost:3000</code> genutzt.</small
+        >
+        <label
+          >Raumcode
+          <input id="room-code" maxlength="16" placeholder="z. B. SQUAD-2026"
+        /></label>
         <button id="join-button" class="primary">Raum betreten</button>
         <p id="join-error" class="error"></p>
       </section>
 
       <section id="tracker-screen" hidden>
         <header>
-          <div><p class="eyebrow">GEMEINSAME JAGD</p><h1>Chest Hunt</h1></div>
+          <div>
+            <p class="eyebrow">GEMEINSAME JAGD</p>
+            <h1>Chest Hunt</h1>
+          </div>
           <div class="room-badge">RAUM <strong id="room-label"></strong></div>
           <button id="leave-button" class="quiet">Raum wechseln</button>
         </header>
         <section class="deadline-banner" aria-label="Deadline 5. Dezember 2026">
-          <div><p class="eyebrow">DEADLINE</p><strong>05. Dezember 2026</strong></div>
+          <div>
+            <p class="eyebrow">DEADLINE</p>
+            <strong>05. Dezember 2026</strong>
+          </div>
           <div id="countdown" class="countdown">— Tage · —:—:—</div>
           <p>Tempo bis zum Erwartungswert (137.500 Kisten)</p>
         </section>
@@ -40,33 +74,65 @@
           <article class="card hero">
             <p class="eyebrow">KISTEN GEÖFFNET</p>
             <div id="counter" class="counter">0</div>
-            <div class="hotkey-line">Hotkey: <button id="hotkey-button" title="Klicken und anschließend Tastenkombination drücken">F8</button></div>
+            <div class="hotkey-line">
+              Hotkey:
+              <button
+                id="hotkey-button"
+                title="Klicken und anschließend Tastenkombination drücken"
+              >
+                F8
+              </button>
+            </div>
             <button id="add-button" class="primary big">+ 1 Kiste</button>
-            <p class="hint">Der Hotkey funktioniert auch, wenn Fortnite im Vordergrund ist.</p>
+            <p class="hint">
+              Der Hotkey funktioniert auch, wenn Fortnite im Vordergrund ist.
+            </p>
           </article>
           <article class="card personal-card">
             <p class="eyebrow">DEIN FORTSCHRITT</p>
-            <div id="my-counter" class="personal-count">0 <span>Kisten</span></div>
-            <div class="personal-chance"><span>Deine Chance auf das Item</span><strong id="my-probability">0,0000 %</strong></div>
-            <p id="my-share" class="formula">Öffne deine erste Kiste für die Squad.</p>
-            <div class="daily-goal"><span>Dein Tempo bis 05.12.</span><strong id="my-daily">— / Tag</strong></div>
+            <div id="my-counter" class="personal-count">
+              0 <span>Kisten</span>
+            </div>
+            <div class="personal-chance">
+              <span>Deine Chance auf das Item</span
+              ><strong id="my-probability">0,0000 %</strong>
+            </div>
+            <p id="my-share" class="formula">
+              Öffne deine erste Kiste für die Squad.
+            </p>
+            <div class="daily-goal">
+              <span>Dein Tempo bis 05.12.</span
+              ><strong id="my-daily">— / Tag</strong>
+            </div>
           </article>
           <article class="card probability-card">
             <p class="eyebrow">CHANCE AUF DAS ITEM</p>
             <div id="probability" class="probability">0,0000 %</div>
-            <p id="formula" class="formula">bei 0 unabhängigen Kisten · 1 : 137.500 pro Kiste</p>
+            <p id="formula" class="formula">
+              bei 0 unabhängigen Kisten · 1 : 137.500 pro Kiste
+            </p>
             <div class="meter"><div id="meter-fill"></div></div>
-            <div class="stats"><span><b id="one-in">—</b> effektive 1-zu-Chance</span><span><b id="remaining">137.500</b> bis zum Erwartungswert</span></div>
-            <div class="daily-goal squad-goal"><span>Squad-Tempo bis 05.12.</span><strong id="squad-daily">— / Tag</strong></div>
+            <div class="stats">
+              <span><b id="one-in">—</b> effektive 1-zu-Chance</span
+              ><span><b id="remaining">137.500</b> bis zum Erwartungswert</span>
+            </div>
+            <div class="daily-goal squad-goal">
+              <span>Squad-Tempo bis 05.12.</span
+              ><strong id="squad-daily">— / Tag</strong>
+            </div>
           </article>
           <article class="card squad-card">
-            <div class="card-title"><div><p class="eyebrow">SQUAD</p><h2>Live-Beiträge</h2></div><span id="online-count" class="online">0 online</span></div>
+            <div class="card-title">
+              <div>
+                <p class="eyebrow">SQUAD</p>
+                <h2>Live-Beiträge</h2>
+              </div>
+              <span id="online-count" class="online">0 online</span>
+            </div>
             <div id="members" class="members"></div>
           </article>
         </div>
       </section>
     </main>
-    <script src="../../node_modules/socket.io-client/dist/socket.io.js"></script>
-    <script src="app.js"></script>
   </body>
 </html>
